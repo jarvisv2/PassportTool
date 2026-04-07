@@ -6,7 +6,8 @@ import tailwindcss from '@tailwindcss/vite'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const config = defineConfig({
-  base: '/jarvisv2/',
+  // CHANGED FROM '/jarvisv2/' TO '/PassportTool/'
+  base: '/PassportTool/', 
   plugins: [
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
