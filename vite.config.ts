@@ -11,10 +11,10 @@ const config = defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    // Remove Netlify, add prerender settings
     tanstackStart({
       prerender: {
-        routes: ['/'],
+        enabled: true, // THIS IS THE MAGIC FLAG WE MISSED
+        routes: ['/', '/PassportTool/'], // Added the base path here to be completely safe
         crawlLinks: true
       }
     }),
