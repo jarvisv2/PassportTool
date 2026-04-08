@@ -226,7 +226,7 @@ export default function PassportPhotoTool() {
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Passport Photo Tool by Jarvis</h1>
+            <h1 className="text-xl font-bold text-gray-900">Passport Photo Tool | 🅾 @darkshadeoflove</h1>
             <p className="text-sm text-gray-500">Create professional passport photos in minutes</p>
           </div>
         </div>
