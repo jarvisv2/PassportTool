@@ -21,7 +21,7 @@ const PAGE_W_PX = PAGE_W_IN * DPI     // 1200
 const PAGE_H_PX = PAGE_H_IN * DPI     // 1800
 const PHOTO_W_PX = PHOTO_W_IN * DPI   // 330
 const PHOTO_H_PX = PHOTO_H_IN * DPI   // 405
-const GAP_PX = Math.round(0.05 * DPI) // 15px gap (~0.05in) between photos for cutting
+const GAP_PX = Math.round(0.10 * DPI) // 30px gap (~0.10in) between photos for cutting
 
 type Step = 'upload' | 'crop' | 'removebg' | 'bgcolor' | 'preview'
 
