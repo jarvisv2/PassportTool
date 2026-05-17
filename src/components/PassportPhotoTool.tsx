@@ -70,6 +70,9 @@ export default function PassportPhotoTool() {
   const [bgRemoved, setBgRemoved] = useState(false)
   const [gridDataUrl, setGridDataUrl] = useState<string | null>(null)
 
+  const [photoCount, setPhotoCount] = useState<6 | 12>(12)
+  const [borderWidth, setBorderWidth] = useState<number>(0)
+
   const imgRef = useRef<HTMLImageElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -140,11 +143,10 @@ export default function PassportPhotoTool() {
     setStep('bgcolor')
   }
 
-  // Apply background color to processed image and generate preview grid
+  // Apply background color, borders, and generate preview grid
   const applyColorAndPreview = useCallback(async () => {
     if (!processedDataUrl) return
 
-    // Flatten: draw bg color + processed image onto canvas
     const img = new Image()
     img.onload = () => {
       // Flat single photo canvas
@@ -152,16 +154,33 @@ export default function PassportPhotoTool() {
       photoCanvas.width = PHOTO_W_PX
       photoCanvas.height = PHOTO_H_PX
       const pCtx = photoCanvas.getContext('2d')!
+      
+      // Draw background
       pCtx.fillStyle = bgColor
       pCtx.fillRect(0, 0, PHOTO_W_PX, PHOTO_H_PX)
+      // Draw photo
       pCtx.drawImage(img, 0, 0, PHOTO_W_PX, PHOTO_H_PX)
 
-      // Grid canvas: 4×6 inches at 300 DPI
-      // Calculate margins to center the grid (accounting for gaps between photos)
-      const totalPhotosW = COLS * PHOTO_W_PX + (COLS - 1) * GAP_PX
-      const totalPhotosH = ROWS * PHOTO_H_PX + (ROWS - 1) * GAP_PX
+      // Draw border if selected
+      if (borderWidth > 0) {
+        // Multiply by 3 so the border is visible on a high-res 300 DPI print
+        pCtx.lineWidth = borderWidth * 3 
+        pCtx.strokeStyle = '#000000' // CHANGED: Now uses a Solid Black cut-line
+        // Offset by half line width so it doesn't clip off the edges
+        const offset = pCtx.lineWidth / 2
+        pCtx.strokeRect(offset, offset, PHOTO_W_PX - pCtx.lineWidth, PHOTO_H_PX - pCtx.lineWidth)
+      }
+
+      // Grid logic: Use 4 rows for 12 photos, or 2 rows for 6 photos
+      const activeCols = 3
+      const activeRows = photoCount === 12 ? 4 : 2
+
+      const totalPhotosW = activeCols * PHOTO_W_PX + (activeCols - 1) * GAP_PX
+      const totalPhotosH = activeRows * PHOTO_H_PX + (activeRows - 1) * GAP_PX
       const marginX = Math.floor((PAGE_W_PX - totalPhotosW) / 2)
-      const marginY = Math.floor((PAGE_H_PX - totalPhotosH) / 2)
+      
+      // CHANGED: If 12 photos, center vertically. If 6 photos, anchor to the top (using marginX for equal top padding).
+      const marginY = photoCount === 12 ? Math.floor((PAGE_H_PX - totalPhotosH) / 2) : marginX
 
       const gridCanvas = document.createElement('canvas')
       gridCanvas.width = PAGE_W_PX
@@ -170,8 +189,8 @@ export default function PassportPhotoTool() {
       gCtx.fillStyle = '#ffffff'
       gCtx.fillRect(0, 0, PAGE_W_PX, PAGE_H_PX)
 
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
+      for (let row = 0; row < activeRows; row++) {
+        for (let col = 0; col < activeCols; col++) {
           const x = marginX + col * (PHOTO_W_PX + GAP_PX)
           const y = marginY + row * (PHOTO_H_PX + GAP_PX)
           gCtx.drawImage(photoCanvas, x, y, PHOTO_W_PX, PHOTO_H_PX)
@@ -181,7 +200,7 @@ export default function PassportPhotoTool() {
       setGridDataUrl(gridCanvas.toDataURL('image/jpeg', 0.95))
     }
     img.src = processedDataUrl
-  }, [processedDataUrl, bgColor])
+  }, [processedDataUrl, bgColor, photoCount, borderWidth])
 
   useEffect(() => {
     if (step === 'preview') {
@@ -189,12 +208,12 @@ export default function PassportPhotoTool() {
     }
   }, [step, applyColorAndPreview])
 
-  // Also regenerate grid when bgColor changes in preview step
+  // Also regenerate grid when settings change in preview step
   useEffect(() => {
     if (step === 'preview') {
       applyColorAndPreview()
     }
-  }, [bgColor]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [bgColor, photoCount, borderWidth]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDownload = () => {
     if (!gridDataUrl) return
@@ -546,25 +565,28 @@ export default function PassportPhotoTool() {
         {/* STEP: PREVIEW & DOWNLOAD */}
         {step === 'preview' && (
           <div className="flex flex-col items-center gap-6">
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm w-full max-w-3xl">
-              <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
+            {/* Expanded to max-w-5xl to comfortably fit the side-by-side layout */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm w-full max-w-5xl">
+              
+              {/* Header & Buttons */}
+              <div className="flex items-start justify-between flex-wrap gap-4 mb-6 pb-4 border-b border-gray-100">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800">4×6 Print Preview</h2>
-                  <p className="text-sm text-gray-500">
-                    12 passport photos (3×4) on a 4×6 inch page at 300 DPI
+                  <h2 className="text-xl font-bold text-gray-800">4×6 Print Preview</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Ready for print at 300 DPI. Download and print at actual size.
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setStep('bgcolor')}
-                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
                   >
                     ← Back
                   </button>
                   <button
                     onClick={handleDownload}
                     disabled={!gridDataUrl}
-                    className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                    className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2 shadow-sm"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -574,60 +596,123 @@ export default function PassportPhotoTool() {
                 </div>
               </div>
 
-              {/* Grid Preview (scaled down for display) */}
-              <div className="flex justify-center">
-                {gridDataUrl ? (
-                  <div className="border-2 border-gray-300 rounded overflow-hidden shadow-md">
-                    <img
-                      src={gridDataUrl}
-                      alt="4x6 Passport Photo Grid"
-                      style={{ width: '400px', height: '600px', display: 'block' }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-[400px] h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2 text-gray-400">
-                      <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
-                      <p className="text-sm">Generating grid...</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Change BG color while in preview */}
-              {gridDataUrl && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm font-medium text-gray-600 mb-2">Adjust Background Color</p>
-                  <div className="flex flex-wrap gap-2 items-center">
-                    {PRESET_COLORS.map(c => (
-                      <button
-                        key={c.value}
-                        onClick={() => { setBgColor(c.value); setCustomColor(c.value) }}
-                        title={c.label}
-                        className={`w-8 h-8 rounded-full border-2 transition-all ${bgColor === c.value ? 'border-blue-500 scale-110' : 'border-gray-300 hover:border-gray-500'}`}
-                        style={{ backgroundColor: c.value }}
+              {/* SIDE-BY-SIDE LAYOUT */}
+              <div className="flex flex-col md:flex-row gap-8 items-start justify-center">
+                
+                {/* Left Side: Grid Preview */}
+                <div className="flex-shrink-0">
+                  {gridDataUrl ? (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white">
+                      <img
+                        src={gridDataUrl}
+                        alt="4x6 Passport Photo Grid"
+                        style={{ width: '400px', height: '600px', display: 'block' }}
                       />
-                    ))}
-                    <input
-                      type="color"
-                      value={customColor}
-                      onChange={e => { setCustomColor(e.target.value); setBgColor(e.target.value) }}
-                      className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-300"
-                      title="Custom color"
-                    />
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="w-[400px] h-[600px] bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3 text-gray-400">
+                        <svg className="animate-spin w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        <p className="text-sm font-medium">Generating high-res grid...</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-blue-700">
-                  <strong>Print tip:</strong> Download the image and print at a photo lab or home printer set to 4×6 inch format at actual size.
-                  The image is {PAGE_W_PX}×{PAGE_H_PX} pixels ({DPI} DPI).
-                </p>
+                {/* Right Side: Settings Sidebar */}
+                <div className="flex flex-col gap-5 w-full max-w-sm">
+                  
+                  {/* Panel 1: Layout Settings */}
+                  {gridDataUrl && (
+                    <div className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col gap-6">
+                      
+                      {/* Photo Count Selection */}
+                      <div>
+                        <p className="text-sm font-bold text-gray-800 mb-3">Number of Photos</p>
+                        <div className="flex flex-col gap-3">
+                          <label className="flex items-center gap-3 cursor-pointer group">
+                            <input 
+                              type="radio" 
+                              checked={photoCount === 6}
+                              onChange={() => setPhotoCount(6)}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700 group-hover:text-blue-600 transition-colors">6 Photos (Half Page)</span>
+                          </label>
+                          <label className="flex items-center gap-3 cursor-pointer group">
+                            <input 
+                              type="radio" 
+                              checked={photoCount === 12}
+                              onChange={() => setPhotoCount(12)}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            <span className="text-sm text-gray-700 group-hover:text-blue-600 transition-colors">12 Photos (Full Page)</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="w-full h-px bg-gray-100"></div>
+
+                      {/* Border Width Slider */}
+                      <div>
+                        <div className="flex justify-between items-center mb-3">
+                          <p className="text-sm font-bold text-gray-800">Cut-Line Stroke</p>
+                          <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded-md">{borderWidth}px</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="5" 
+                          step="1"
+                          value={borderWidth} 
+                          onChange={(e) => setBorderWidth(Number(e.target.value))}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        />
+                        <p className="text-xs text-gray-400 mt-2">Adds a black border for easy cutting.</p>
+                      </div>
+                      
+                    </div>
+                  )}
+
+                  {/* Panel 2: Background Color */}
+                  {gridDataUrl && (
+                    <div className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
+                      <p className="text-sm font-bold text-gray-800 mb-3">Background Color</p>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {PRESET_COLORS.map(c => (
+                          <button
+                            key={c.value}
+                            onClick={() => { setBgColor(c.value); setCustomColor(c.value) }}
+                            title={c.label}
+                            className={`w-8 h-8 rounded-full border-2 transition-all shadow-sm ${bgColor === c.value ? 'border-blue-500 scale-110 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-400'}`}
+                            style={{ backgroundColor: c.value }}
+                          />
+                        ))}
+                        <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                        <input
+                          type="color"
+                          value={customColor}
+                          onChange={e => { setCustomColor(e.target.value); setBgColor(e.target.value) }}
+                          className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-200 shadow-sm"
+                          title="Custom color"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Print Tip */}
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                    <p className="text-sm text-blue-800 leading-relaxed">
+                      <span className="font-bold">🖨️ Print tip:</span> Download the image and print at a photo lab or home printer. Ensure your printer is set to <span className="font-semibold">4×6 inch format at Actual Size (No Borders)</span>.
+                    </p>
+                  </div>
+
+                </div>
               </div>
+
             </div>
           </div>
         )}
