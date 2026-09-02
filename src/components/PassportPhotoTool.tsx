@@ -380,7 +380,7 @@ export default function PassportPhotoTool() {
               href="https://instagram.com/darkshadeoflove"
               target="_blank"
               rel="noreferrer"
-              aria-label="Instagram @darkshadeoflove"
+              aria-label="Instagram darkshadeoflove"
               className="passport-social passport-instagram group inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -395,7 +395,7 @@ export default function PassportPhotoTool() {
               href="https://github.com/jarvisv2"
               target="_blank"
               rel="noreferrer"
-              aria-label="GitHub @jarvisv2"
+              aria-label="GitHub jarvisv2"
               className="passport-social passport-github group inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
