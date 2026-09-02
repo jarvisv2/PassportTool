@@ -404,6 +404,19 @@ export default function PassportPhotoTool() {
               <span className="hidden sm:inline">@jarvisv2</span>
               <span className="sm:hidden">GitHub</span>
             </a>
+            <a
+              href="https://www.facebook.com/palu.das.33/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook Soumen Kumbhakar"
+              className="passport-social group inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_30px_-18px_rgba(59,130,246,.45)]"
+            >
+              <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13.5 22v-8h2.75l.4-3h-3.15V9.08c0-.87.24-1.46 1.5-1.46h1.8V4.94c-.31-.04-1.37-.13-2.6-.13-2.57 0-4.33 1.57-4.33 4.45V11H7v3h2.67v8h3.83z"/>
+              </svg>
+              <span className="hidden sm:inline">Soumen Kumbhakar</span>
+              <span className="sm:hidden">Facebook</span>
+            </a>
           </div>
         </div>
       </header>
@@ -937,6 +950,10 @@ export default function PassportPhotoTool() {
                       <span className="text-slate-300">·</span>
                       <a href="https://github.com/jarvisv2" target="_blank" rel="noreferrer" className="text-xs font-semibold text-slate-700 hover:text-slate-950 transition-colors">
                         @jarvisv2
+                      </a>
+                      <span className="text-slate-300">·</span>
+                      <a href="https://www.facebook.com/palu.das.33/" target="_blank" rel="noreferrer" className="text-xs font-semibold text-slate-700 hover:text-slate-950 transition-colors">
+                        Soumen Kumbhakar
                       </a>
                     </div>
                   </div>
