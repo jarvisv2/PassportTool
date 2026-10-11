@@ -5,7 +5,7 @@ import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig({
-  base: '/PassportTool/',
+  base: '/',
   plugins: [
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
