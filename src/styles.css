@@ -1,15 +1,616 @@
 @import "tailwindcss" source("../");
 
-body {
-  @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #070914;
+  color: #f3f5ff;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+* { box-sizing: border-box; }
+html { min-width: 320px; scroll-behavior: smooth; background: #070914; }
+body { @apply m-0; min-width: 320px; min-height: 100vh; background: #070914; }
+body, button, input { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, a, input, label { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid rgba(103, 232, 249, .9); outline-offset: 3px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+::selection { color: #f7fbff; background: rgba(99, 102, 241, .7); }
+
+/* Global midnight / aurora surface */
+.passport-app {
+  --pointer-x: 52vw;
+  --pointer-y: 30vh;
+  --ink: #f3f5ff;
+  --muted: #9aa5c4;
+  --muted-soft: #7783a5;
+  --edge: rgba(157, 174, 225, .16);
+  --panel: rgba(15, 19, 39, .76);
+  --panel-strong: rgba(17, 22, 44, .92);
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: clip;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 14% -8%, rgba(47, 64, 158, .25), transparent 38%),
+    radial-gradient(ellipse at 96% 19%, rgba(98, 50, 163, .17), transparent 34%),
+    linear-gradient(145deg, #080a16 0%, #0a0d1c 45%, #080914 100%);
 }
+.passport-app::before,
+.passport-app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.passport-app::before {
+  background:
+    radial-gradient(560px circle at var(--pointer-x) var(--pointer-y), rgba(72, 100, 255, .12), transparent 70%),
+    radial-gradient(600px circle at 10% 90%, rgba(26, 189, 222, .075), transparent 72%),
+    radial-gradient(760px circle at 90% 8%, rgba(160, 85, 255, .095), transparent 70%);
+  animation: auroraBreath 13s ease-in-out infinite alternate;
+  will-change: opacity, transform;
+}
+.passport-app::after {
+  opacity: .2;
+  background-image: linear-gradient(rgba(156, 172, 232, .10) 1px, transparent 1px), linear-gradient(90deg, rgba(156, 172, 232, .10) 1px, transparent 1px);
+  background-size: 54px 54px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse at 50% 20%, #000 0%, transparent 78%);
+  animation: gridDrift 42s linear infinite;
+}
+.passport-app > header,
+.passport-app > main,
+.passport-app > footer,
+.passport-app > div:not(style) { position: relative; z-index: 1; }
+.passport-app header {
+  background: rgba(8, 10, 22, .76) !important;
+  border-color: rgba(153, 170, 225, .15) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.025), 0 16px 50px -35px rgba(67, 90, 255, .45);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+.passport-app header h1 { color: #f6f7ff !important; letter-spacing: -.035em; }
+.passport-app header p { color: #8f9bbd !important; }
+.passport-app main { min-height: calc(100vh - 150px); }
+.passport-app footer {
+  color: #75809f !important;
+  background: rgba(8, 10, 22, .62) !important;
+  border-color: rgba(153, 170, 225, .13) !important;
+  backdrop-filter: blur(18px);
+}
+
+/* Rich, layered glass panels and readable dark-theme utility surfaces */
+.passport-app .passport-glass { background: rgba(8, 10, 22, .76) !important; backdrop-filter: blur(24px) saturate(145%); }
+.passport-app .bg-white,
+.passport-app [class~="bg-white/70"],
+.passport-app [class~="bg-white/75"] {
+  background: linear-gradient(145deg, rgba(20, 25, 49, .91), rgba(12, 16, 34, .88)) !important;
+}
+.passport-app .bg-slate-50,
+.passport-app [class~="bg-slate-50"] { background-color: rgba(12, 16, 32, .88) !important; }
+.passport-app .bg-slate-100,
+.passport-app [class~="bg-slate-100"] { background-color: rgba(143, 158, 205, .10) !important; }
+.passport-app .bg-slate-200,
+.passport-app [class~="bg-slate-200"] { background-color: rgba(143, 158, 205, .18) !important; }
+.passport-app .bg-slate-950 { background: linear-gradient(145deg, #13182f, #0b0e1d) !important; }
+.passport-app [class~="bg-[#eef0f3]"] { background: #0c1020 !important; }
+.passport-app .border-slate-100,
+.passport-app .border-slate-200,
+.passport-app .border-slate-300 { border-color: rgba(158, 174, 224, .16) !important; }
+.passport-app .text-slate-950,
+.passport-app .text-slate-900 { color: #f3f5ff !important; }
+.passport-app .text-slate-700,
+.passport-app .text-slate-600 { color: #c2cae2 !important; }
+.passport-app .text-slate-500 { color: #929dbb !important; }
+.passport-app .text-slate-400 { color: #7783a3 !important; }
+.passport-app .text-slate-300 { color: #bac5e2 !important; }
+.passport-app .text-slate-200 { color: #d8def4 !important; }
+.passport-app .shadow-sm { box-shadow: 0 12px 34px -25px rgba(0, 0, 0, .65), 0 1px 0 rgba(255,255,255,.025) inset !important; }
+.passport-app .shadow-lg,
+.passport-app .shadow-xl { box-shadow: 0 22px 55px -32px rgba(0,0,0,.78), 0 0 0 1px rgba(160,174,230,.035) !important; }
+.passport-app [class*="shadow-[0_18px"] { box-shadow: 0 28px 70px -38px rgba(0,0,0,.86), 0 0 0 1px rgba(156,174,232,.045) !important; }
+.passport-app .rounded-\[26px\],
+.passport-app .rounded-\[22px\] { border-color: rgba(151, 169, 226, .16); }
+
+/* The brand mark becomes a luminous cyan-indigo prism */
+.passport-app .passport-brand,
+.passport-app .passport-icon-gradient {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #26d9ef 0%, #4f78ff 43%, #9560ff 100%) !important;
+  box-shadow: 0 14px 34px -15px rgba(61, 126, 255, .75), 0 0 0 1px rgba(165, 219, 255, .22) inset !important;
+}
+.passport-app .passport-brand::after,
+.passport-app .passport-icon-gradient::after {
+  content: "";
+  position: absolute;
+  inset: -60% auto -60% -60%;
+  width: 42%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent);
+  animation: brandSweep 5.5s ease-in-out infinite;
+}
+.passport-app .passport-pro {
+  border-color: rgba(80, 208, 255, .24) !important;
+  background: linear-gradient(110deg, rgba(51, 201, 241, .11), rgba(105, 102, 255, .13), rgba(177, 92, 255, .12)) !important;
+  color: #99eaff !important;
+  box-shadow: 0 0 24px -18px rgba(47, 207, 255, .75) inset;
+}
+.passport-app .passport-hero-gradient {
+  background: linear-gradient(95deg, #72f0ff 0%, #8eaeff 38%, #b39bff 70%, #e19bff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: titleGlow 9s ease-in-out infinite alternate;
+}
+.passport-app .passport-active {
+  background: linear-gradient(115deg, #22cce8 0%, #4f79ff 48%, #9a61ff 100%) !important;
+  box-shadow: 0 10px 28px -14px rgba(81, 132, 255, .82), 0 0 0 1px rgba(210,243,255,.22) inset !important;
+  color: #fff !important;
+}
+.passport-app .passport-active > span:first-child { color: #152144 !important; }
+.passport-app .passport-step-line { background: linear-gradient(90deg, rgba(34, 211, 238, .48), rgba(139, 92, 246, .55)) !important; box-shadow: 0 0 10px rgba(75, 116, 255, .2); }
+.passport-app .passport-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(174, 210, 255, .24) !important;
+  background: linear-gradient(110deg, #1fbfdc 0%, #4d78ff 47%, #8d5aff 100%) !important;
+  box-shadow: 0 13px 34px -17px rgba(80, 115, 255, .9), 0 0 0 1px rgba(210,239,255,.13) inset !important;
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s ease, filter .28s ease !important;
+}
+.passport-app .passport-cta::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -50%; bottom: -50%; left: -45%;
+  width: 30%;
+  transform: skewX(-22deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.30), transparent);
+  transition: left .65s cubic-bezier(.2,.8,.2,1);
+}
+.passport-app .passport-cta:hover::before { left: 130%; }
+.passport-app .passport-cta:hover { filter: saturate(1.12) brightness(1.08); transform: translateY(-2px); box-shadow: 0 19px 42px -19px rgba(76, 126, 255, .95), 0 0 22px -13px rgba(91, 220, 255, .75) !important; }
+.passport-app .passport-cta:active { transform: translateY(0) scale(.985); }
+.passport-app .passport-cta:disabled { filter: grayscale(.25); box-shadow: none !important; }
+
+/* Upload dropzone: animated edge, dimensional hover, and soft light leaks */
+.passport-app .passport-upload-card {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(119, 143, 255, .33) !important;
+  background: linear-gradient(145deg, rgba(25, 31, 63, .93), rgba(12, 15, 32, .94)) !important;
+  box-shadow: 0 38px 90px -53px rgba(62, 90, 255, .7), 0 0 0 1px rgba(160, 188, 255, .04) inset !important;
+  transition: transform .45s cubic-bezier(.2,.8,.2,1), border-color .35s ease, box-shadow .35s ease !important;
+}
+.passport-app .passport-upload-card::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: 8%; right: 8%; top: 0;
+  height: 1px;
+  opacity: .8;
+  background: linear-gradient(90deg, transparent, #4de4f2, #8189ff, #d2a0ff, transparent);
+  background-size: 200% 100%;
+  animation: edgeFlow 7s linear infinite;
+}
+.passport-app .passport-upload-card:hover {
+  transform: translateY(-5px) scale(1.004);
+  border-color: rgba(93, 202, 255, .55) !important;
+  box-shadow: 0 43px 100px -53px rgba(74, 108, 255, .85), 0 0 38px -25px rgba(58, 212, 239, .65) !important;
+}
+.passport-app .passport-upload-inner {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(46, 135, 255, .13), transparent 31%),
+    radial-gradient(circle at 85% 85%, rgba(156, 88, 255, .14), transparent 33%),
+    radial-gradient(circle at 52% 110%, rgba(42, 214, 231, .075), transparent 30%),
+    rgba(8, 12, 27, .72) !important;
+  border-color: rgba(116, 158, 255, .38) !important;
+  transition: border-color .35s ease, background-position .6s ease;
+}
+.passport-app .passport-upload-card:hover .passport-upload-inner { border-color: rgba(94, 219, 255, .62) !important; }
+.passport-app .passport-pulse { animation: haloPulse 3.2s ease-in-out infinite; }
+.passport-app .passport-feature {
+  border-color: rgba(147, 163, 222, .16) !important;
+  background: linear-gradient(145deg, rgba(19, 24, 47, .92), rgba(12, 15, 31, .88)) !important;
+  box-shadow: 0 16px 36px -30px rgba(0,0,0,.9);
+}
+.passport-app .passport-feature::before { height: 2px; background: linear-gradient(90deg, #22d3ee, #5b83ff, #ad79ff, transparent); opacity: .85; }
+.passport-app .passport-feature:hover { transform: translateY(-5px) scale(1.012); border-color: rgba(101, 190, 255, .32) !important; box-shadow: 0 23px 42px -30px rgba(82, 111, 255, .55), 0 0 22px -22px rgba(57, 210, 239, .9); }
+
+/* Social links / controls */
+.passport-app .passport-social {
+  border-color: rgba(150, 166, 222, .19) !important;
+  background: rgba(19, 24, 47, .75) !important;
+  color: #d9e1fb !important;
+  box-shadow: 0 8px 24px -20px rgba(0,0,0,.8);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s ease, box-shadow .25s ease, background .25s ease !important;
+}
+.passport-app .passport-social:hover { transform: translateY(-2px); border-color: rgba(117, 201, 255, .38) !important; background: rgba(27, 34, 65, .9) !important; box-shadow: 0 12px 28px -18px rgba(75, 123, 255, .65); }
+.passport-app .passport-instagram svg { color: #ff8dca !important; }
+.passport-app .passport-github svg { color: #a5b4fc !important; }
+.passport-app a { transition: color .22s ease, opacity .22s ease; }
+.passport-app a:hover { opacity: .96; }
+
+/* Moving panels, buttons, photo previews, inputs, and selected options */
+.passport-app .passport-enter { animation: panelArrive .62s cubic-bezier(.2,.78,.2,1) both; }
+.passport-app .passport-delay-1 { animation-delay: .08s; }
+.passport-app .passport-delay-2 { animation-delay: .16s; }
+.passport-app .passport-delay-3 { animation-delay: .24s; }
+.passport-app button,
+.passport-app label,
+.passport-app input[type="color"] { transition: color .22s ease, background-color .22s ease, border-color .22s ease, box-shadow .25s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
+.passport-app button:not(:disabled):active { transform: scale(.975); }
+.passport-app button:disabled { cursor: not-allowed; }
+.passport-app main button:not(.passport-cta):hover { border-color: rgba(123, 175, 255, .42); }
+.passport-app main label { border-color: rgba(150, 166, 222, .18); }
+.passport-app main label:hover { border-color: rgba(117, 187, 255, .42) !important; background-color: rgba(85, 111, 209, .09) !important; }
+.passport-app main label:has(input[type="radio"]:checked) { border-color: rgba(92, 174, 255, .62) !important; background: linear-gradient(130deg, rgba(37, 171, 222, .12), rgba(111, 93, 255, .14)) !important; box-shadow: 0 0 0 1px rgba(88, 171, 255, .12) inset, 0 8px 25px -22px rgba(78, 137, 255, .7); }
+.passport-app input[type="text"] { color: #e8edff !important; caret-color: #67e8f9; }
+.passport-app input[type="color"] { border-color: rgba(151, 169, 226, .22) !important; background: rgba(255,255,255,.05) !important; }
+.passport-app input[type="range"] { accent-color: #6e8dff !important; }
+.passport-app main img:not([alt="Upload"]) { transition: transform .35s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
+.passport-app main img:not([alt="Upload"]):hover { filter: saturate(1.06) contrast(1.015); }
+.passport-app .ReactCrop { border-radius: 12px; overflow: hidden; }
+.passport-app .ReactCrop__crop-selection { border: 1px solid rgba(93, 226, 255, .98) !important; box-shadow: 0 0 0 9999em rgba(5, 9, 25, .42), 0 0 0 1px rgba(95, 195, 255, .2), 0 0 20px rgba(44, 211, 238, .28) !important; }
+.passport-app .ReactCrop__drag-handle::after { background: #6de9ff !important; border-color: #0b1730 !important; box-shadow: 0 0 0 2px rgba(84, 220, 255, .28); }
+.passport-app .passport-instagram,
+.passport-app .passport-github { border-radius: 13px; }
+
+@keyframes panelArrive {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.99); filter: blur(4px); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+@keyframes auroraBreath {
+  0% { opacity: .7; transform: scale(1) translate3d(0, 0, 0); }
+  100% { opacity: 1; transform: scale(1.04) translate3d(0, -1%, 0); }
+}
+@keyframes gridDrift { from { background-position: 0 0; } to { background-position: 54px 54px; } }
+@keyframes brandSweep { 0%, 38% { left: -60%; } 67%, 100% { left: 135%; } }
+@keyframes titleGlow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes edgeFlow { from { background-position: 0% 0; } to { background-position: 200% 0; } }
+@keyframes haloPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 151, 255, .22), 0 14px 32px -14px rgba(124, 92, 255, .65); }
+  50% { box-shadow: 0 0 0 10px rgba(74, 151, 255, 0), 0 18px 38px -15px rgba(47, 204, 242, .48); }
+}
+
+@media (max-width: 640px) {
+  .passport-app::after { background-size: 36px 36px; opacity: .14; }
+  .passport-app header .max-w-6xl { padding-top: .7rem; padding-bottom: .7rem; }
+  .passport-app main { padding-top: 1.75rem; padding-bottom: 2rem; }
+  .passport-app .passport-upload-card:hover { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Refined studio theme: luminous, editorial light mode + cinematic step flow */
+/* -------------------------------------------------------------------------- */
+.passport-app[data-theme="light"] {
+  color-scheme: light;
+  --ink: #17213b;
+  --muted: #64708c;
+  --muted-soft: #8792ac;
+  --edge: rgba(91, 108, 167, .18);
+  --panel: rgba(255, 255, 255, .78);
+  --panel-strong: rgba(255, 255, 255, .94);
+  background:
+    radial-gradient(ellipse at 8% -10%, rgba(115, 133, 255, .22), transparent 38%),
+    radial-gradient(ellipse at 93% 9%, rgba(44, 195, 220, .14), transparent 31%),
+    radial-gradient(ellipse at 80% 85%, rgba(171, 142, 255, .15), transparent 37%),
+    linear-gradient(145deg, #f8faff 0%, #f1f6ff 47%, #fcf8ff 100%);
+  color: var(--ink);
+}
+.passport-app[data-theme="light"]::before {
+  background:
+    radial-gradient(560px circle at var(--pointer-x) var(--pointer-y), rgba(99, 116, 255, .16), transparent 70%),
+    radial-gradient(600px circle at 10% 90%, rgba(35, 190, 218, .11), transparent 72%),
+    radial-gradient(760px circle at 90% 8%, rgba(171, 128, 255, .12), transparent 70%);
+  opacity: .88;
+}
+.passport-app[data-theme="light"]::after {
+  opacity: .22;
+  background-image:
+    linear-gradient(rgba(111, 130, 191, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(111, 130, 191, .12) 1px, transparent 1px);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse at 50% 20%, #000 0%, transparent 78%);
+}
+.passport-app[data-theme="light"] header {
+  background: rgba(255, 255, 255, .78) !important;
+  border-color: rgba(123, 139, 187, .20) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.92), 0 14px 36px -30px rgba(56, 76, 146, .36);
+}
+.passport-app[data-theme="light"] header h1 { color: #17213b !important; }
+.passport-app[data-theme="light"] header p { color: #6c7893 !important; }
+.passport-app[data-theme="light"] header + div {
+  background: rgba(255, 255, 255, .58) !important;
+  border-color: rgba(123, 139, 187, .16) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.passport-app[data-theme="light"] footer {
+  color: #7985a0 !important;
+  background: rgba(255, 255, 255, .58) !important;
+  border-color: rgba(123, 139, 187, .17) !important;
+  backdrop-filter: blur(18px);
+}
+.passport-app[data-theme="light"] .passport-glass {
+  background: rgba(255, 255, 255, .76) !important;
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.passport-app[data-theme="light"] .bg-white,
+.passport-app[data-theme="light"] [class~="bg-white/70"],
+.passport-app[data-theme="light"] [class~="bg-white/75"] {
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(250,252,255,.91)) !important;
+}
+.passport-app[data-theme="light"] .bg-slate-50,
+.passport-app[data-theme="light"] [class~="bg-slate-50"] { background-color: rgba(242, 246, 255, .93) !important; }
+.passport-app[data-theme="light"] .bg-slate-100,
+.passport-app[data-theme="light"] [class~="bg-slate-100"] { background-color: rgba(226, 233, 250, .78) !important; }
+.passport-app[data-theme="light"] .bg-slate-200,
+.passport-app[data-theme="light"] [class~="bg-slate-200"] { background-color: rgba(211, 221, 244, .82) !important; }
+.passport-app[data-theme="light"] [class~="bg-[#eef0f3]"] { background: linear-gradient(145deg, #edf2fb, #e8edf8) !important; }
+.passport-app[data-theme="light"] .border-slate-100,
+.passport-app[data-theme="light"] .border-slate-200,
+.passport-app[data-theme="light"] .border-slate-300 { border-color: rgba(116, 132, 181, .20) !important; }
+.passport-app[data-theme="light"] .text-slate-950,
+.passport-app[data-theme="light"] .text-slate-900 { color: #18233f !important; }
+.passport-app[data-theme="light"] .text-slate-700,
+.passport-app[data-theme="light"] .text-slate-600 { color: #4d5b78 !important; }
+.passport-app[data-theme="light"] .text-slate-500 { color: #6e7b97 !important; }
+.passport-app[data-theme="light"] .text-slate-400 { color: #8995b0 !important; }
+.passport-app[data-theme="light"] .text-slate-300 { color: #66738f !important; }
+.passport-app[data-theme="light"] .text-slate-200 { color: #4c5a78 !important; }
+.passport-app[data-theme="light"] .shadow-sm { box-shadow: 0 13px 34px -28px rgba(56, 76, 138, .4), 0 1px 0 rgba(255,255,255,.85) inset !important; }
+.passport-app[data-theme="light"] .shadow-lg,
+.passport-app[data-theme="light"] .shadow-xl { box-shadow: 0 22px 52px -34px rgba(56, 76, 138, .42), 0 0 0 1px rgba(116,132,181,.05) !important; }
+.passport-app[data-theme="light"] [class*="shadow-[0_18px"] { box-shadow: 0 28px 62px -38px rgba(58, 78, 144, .38), 0 0 0 1px rgba(116,132,181,.055) !important; }
+.passport-app[data-theme="light"] .rounded-\[26px\],
+.passport-app[data-theme="light"] .rounded-\[22px\] { border-color: rgba(116, 132, 181, .20); }
+
+/* A refined indigo / cyan identity that reads clearly in daylight */
+.passport-app[data-theme="light"] .passport-brand,
+.passport-app[data-theme="light"] .passport-icon-gradient {
+  background: linear-gradient(135deg, #4564ee 0%, #675df2 48%, #16a7c7 100%) !important;
+  box-shadow: 0 15px 32px -16px rgba(72, 97, 225, .62), 0 0 0 1px rgba(255,255,255,.48) inset !important;
+}
+.passport-app[data-theme="light"] .passport-pro {
+  border-color: rgba(92, 112, 230, .22) !important;
+  background: linear-gradient(105deg, rgba(82, 112, 244, .09), rgba(30, 171, 204, .09)) !important;
+  color: #4e60d4 !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.65) inset;
+}
+.passport-app[data-theme="light"] .passport-hero-gradient {
+  background: linear-gradient(95deg, #405bd9 0%, #6751dc 43%, #138fab 100%);
+  background-size: 190% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: titleGlow 11s ease-in-out infinite alternate;
+}
+.passport-app[data-theme="light"] .passport-active {
+  background: linear-gradient(110deg, #4966ec 0%, #665eea 55%, #278fca 100%) !important;
+  box-shadow: 0 10px 25px -15px rgba(76, 97, 220, .68), 0 0 0 1px rgba(255,255,255,.26) inset !important;
+  color: #fff !important;
+  animation: activeStepSettle .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.passport-app[data-theme="light"] .passport-active > span:first-child { color: #3346aa !important; }
+.passport-app[data-theme="light"] .passport-step-line {
+  background: linear-gradient(90deg, rgba(86, 111, 233, .35), rgba(43, 171, 203, .30)) !important;
+  box-shadow: none;
+}
+.passport-app[data-theme="light"] .passport-cta {
+  background: linear-gradient(112deg, #465fea 0%, #6459e8 50%, #168fae 100%) !important;
+  border-color: rgba(255,255,255,.42) !important;
+  box-shadow: 0 14px 30px -17px rgba(70, 92, 218, .68), 0 1px 0 rgba(255,255,255,.22) inset !important;
+}
+.passport-app[data-theme="light"] .passport-cta:hover {
+  filter: saturate(1.06) brightness(1.045);
+  box-shadow: 0 19px 38px -19px rgba(70, 92, 218, .72), 0 0 0 4px rgba(97, 113, 232, .08) !important;
+}
+.passport-app[data-theme="light"] .passport-upload-card {
+  border-color: rgba(112, 127, 220, .28) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(246,249,255,.96)) !important;
+  box-shadow: 0 32px 76px -48px rgba(56, 80, 177, .42), 0 0 0 1px rgba(255,255,255,.9) inset !important;
+}
+.passport-app[data-theme="light"] .passport-upload-card:hover {
+  border-color: rgba(87, 109, 225, .47) !important;
+  box-shadow: 0 39px 84px -47px rgba(65, 88, 201, .50), 0 0 0 5px rgba(103, 122, 239, .055) !important;
+}
+.passport-app[data-theme="light"] .passport-upload-inner {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(83, 111, 239, .10), transparent 31%),
+    radial-gradient(circle at 88% 82%, rgba(30, 172, 207, .10), transparent 33%),
+    linear-gradient(145deg, rgba(249,251,255,.92), rgba(242,247,255,.93)) !important;
+  border-color: rgba(107, 126, 225, .32) !important;
+}
+.passport-app[data-theme="light"] .passport-feature {
+  border-color: rgba(113, 129, 183, .19) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.91), rgba(247,250,255,.91)) !important;
+  box-shadow: 0 17px 38px -32px rgba(56, 76, 138, .45), 0 1px 0 rgba(255,255,255,.9) inset;
+}
+.passport-app[data-theme="light"] .passport-feature::before { background: linear-gradient(90deg, #536ce8, #7a68eb, #37b7ce, transparent); opacity: .75; }
+.passport-app[data-theme="light"] .passport-feature:hover {
+  border-color: rgba(101, 119, 228, .32) !important;
+  box-shadow: 0 24px 42px -32px rgba(67, 88, 190, .48), 0 0 0 1px rgba(255,255,255,.8) inset;
+}
+.passport-app[data-theme="light"] .passport-social {
+  border-color: rgba(118, 133, 183, .22) !important;
+  background: rgba(255,255,255,.80) !important;
+  color: #465371 !important;
+  box-shadow: 0 8px 23px -19px rgba(48, 70, 139, .42);
+}
+.passport-app[data-theme="light"] .passport-social:hover {
+  border-color: rgba(94, 114, 222, .36) !important;
+  background: #fff !important;
+  box-shadow: 0 12px 28px -19px rgba(64, 87, 190, .47);
+}
+.passport-app[data-theme="light"] .passport-instagram svg { color: #cf4e88 !important; }
+.passport-app[data-theme="light"] .passport-github svg { color: #5961ba !important; }
+.passport-app[data-theme="light"] .passport-theme-toggle {
+  border-color: rgba(101, 119, 193, .26) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(239,244,255,.9)) !important;
+  color: #4c5ed0 !important;
+  box-shadow: 0 7px 19px -16px rgba(50, 69, 154, .52), 0 1px 0 rgba(255,255,255,.9) inset;
+}
+.passport-app[data-theme="light"] .passport-theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: rgba(80, 103, 220, .45) !important;
+  box-shadow: 0 12px 24px -17px rgba(62, 83, 190, .62), 0 0 0 4px rgba(87, 106, 222, .065);
+}
+.passport-app[data-theme="dark"] .passport-theme-toggle {
+  border-color: rgba(150, 166, 222, .22) !important;
+  background: rgba(19, 24, 47, .76) !important;
+  color: #dbe4ff !important;
+}
+.passport-app[data-theme="dark"] .passport-theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: rgba(104, 198, 255, .42) !important;
+  box-shadow: 0 12px 25px -18px rgba(70, 125, 255, .68);
+}
+.passport-app[data-theme="light"] input[type="text"] { color: #1c2948 !important; caret-color: #4e66df; }
+.passport-app[data-theme="light"] input[type="color"] { border-color: rgba(116,132,181,.24) !important; background: rgba(255,255,255,.95) !important; }
+.passport-app[data-theme="light"] input[type="range"] { accent-color: #596be4 !important; }
+.passport-app[data-theme="light"] main label { border-color: rgba(116, 132, 181, .22); }
+.passport-app[data-theme="light"] main label:hover { border-color: rgba(92, 112, 225, .42) !important; background-color: rgba(94, 120, 231, .055) !important; }
+.passport-app[data-theme="light"] main label:has(input[type="radio"]:checked) {
+  border-color: rgba(83, 105, 221, .55) !important;
+  background: linear-gradient(130deg, rgba(81, 108, 231, .08), rgba(36, 171, 202, .07)) !important;
+  box-shadow: 0 0 0 1px rgba(88, 113, 222, .09) inset, 0 8px 24px -22px rgba(78, 103, 211, .62);
+}
+.passport-app[data-theme="light"] .ReactCrop__crop-selection {
+  border-color: rgba(49, 185, 218, .98) !important;
+  box-shadow: 0 0 0 9999em rgba(25, 38, 70, .37), 0 0 0 1px rgba(45, 175, 222, .18), 0 0 18px rgba(38, 183, 219, .25) !important;
+}
+.passport-app[data-theme="light"] .ReactCrop__drag-handle::after { background: #35bdd8 !important; border-color: #f8fbff !important; }
+
+/* The print-tip callout keeps its cinematic dark treatment in dark mode,
+   but becomes a readable, luminous surface in light mode. */
+.passport-app[data-theme="light"] .passport-print-tip {
+  background: linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(242,247,255,.96) 58%, rgba(239,249,255,.96) 100%) !important;
+  color: #182542 !important;
+  border-color: rgba(104, 124, 197, .24) !important;
+  box-shadow: 0 20px 42px -30px rgba(60, 80, 158, .38), 0 1px 0 rgba(255,255,255,.96) inset !important;
+}
+.passport-app[data-theme="light"] .passport-print-tip-icon {
+  background: linear-gradient(145deg, #e8edff, #e5f7fb) !important;
+  color: #4f5fca !important;
+  box-shadow: 0 0 0 1px rgba(99, 119, 205, .10) inset;
+}
+.passport-app[data-theme="light"] .passport-print-tip-title {
+  color: #1c2948 !important;
+}
+.passport-app[data-theme="light"] .passport-print-tip-copy {
+  color: #65728e !important;
+}
+
+/* Cinematic next/back transitions. CSS-only so no extra dependency or workflow change. */
+.passport-app .passport-enter {
+  animation-duration: .72s;
+  animation-timing-function: cubic-bezier(.19, 1, .22, 1);
+  will-change: opacity, transform, filter;
+}
+.passport-app[data-direction="forward"] .passport-enter { animation-name: stepForwardIn; }
+.passport-app[data-direction="backward"] .passport-enter { animation-name: stepBackwardIn; }
+.passport-app .passport-delay-1 { animation-delay: .07s; }
+.passport-app .passport-delay-2 { animation-delay: .14s; }
+.passport-app .passport-delay-3 { animation-delay: .21s; }
+.passport-app .passport-step-line { transform-origin: left center; }
+.passport-app .passport-active { transform-origin: center; }
+.passport-app main .rounded-\[26px\],
+.passport-app main .rounded-\[22px\] { transition: border-color .3s ease, box-shadow .35s ease, background-color .3s ease; }
+.passport-app main .passport-upload-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(112deg, transparent 22%, rgba(255,255,255,.20) 47%, transparent 70%);
+  transform: translateX(-125%);
+  transition: transform .9s cubic-bezier(.2,.8,.2,1);
+}
+.passport-app main .passport-upload-card:hover::after { transform: translateX(125%); }
+.passport-app main .passport-cta svg { transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.passport-app main .passport-cta:hover svg { transform: translateX(3px); }
+.passport-app .passport-feature { transition: transform .36s cubic-bezier(.2,.8,.2,1), box-shadow .36s ease, border-color .3s ease !important; }
+.passport-app .passport-feature:nth-child(2) { animation-delay: .13s; }
+.passport-app .passport-feature:nth-child(3) { animation-delay: .20s; }
+
+@keyframes stepForwardIn {
+  0% { opacity: 0; transform: perspective(1400px) translate3d(42px, 15px, 0) rotateY(-2deg) scale(.985); filter: blur(7px); }
+  68% { opacity: 1; transform: perspective(1400px) translate3d(-3px, 0, 0) rotateY(.15deg) scale(1.002); filter: blur(0); }
+  100% { opacity: 1; transform: perspective(1400px) translate3d(0, 0, 0) rotateY(0) scale(1); filter: blur(0); }
+}
+@keyframes stepBackwardIn {
+  0% { opacity: 0; transform: perspective(1400px) translate3d(-42px, 15px, 0) rotateY(2deg) scale(.985); filter: blur(7px); }
+  68% { opacity: 1; transform: perspective(1400px) translate3d(3px, 0, 0) rotateY(-.15deg) scale(1.002); filter: blur(0); }
+  100% { opacity: 1; transform: perspective(1400px) translate3d(0, 0, 0) rotateY(0) scale(1); filter: blur(0); }
+}
+@keyframes activeStepSettle {
+  0% { transform: scale(.94); filter: saturate(.8); }
+  68% { transform: scale(1.035); filter: saturate(1.08); }
+  100% { transform: scale(1); filter: saturate(1); }
+}
+
+@media (max-width: 760px) {
+  .passport-app[data-theme="light"]::after { opacity: .13; background-size: 38px 38px; }
+  .passport-app .passport-theme-toggle { padding: .55rem .62rem; }
+  .passport-app header .max-w-6xl { gap: .6rem; }
+  .passport-app header .flex.items-center.gap-2.shrink-0 { gap: .35rem; }
+  .passport-app header a.passport-social { padding-left: .55rem; padding-right: .55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .passport-app .passport-enter,
+  .passport-app[data-direction="forward"] .passport-enter,
+  .passport-app[data-direction="backward"] .passport-enter { animation: none !important; filter: none !important; }
+  .passport-app main .passport-upload-card::after { display: none; }
+}
+@media (max-width: 480px) {
+  .passport-app header a.passport-social { display: none !important; }
+  .passport-app header .max-w-6xl { padding-left: .9rem; padding-right: .9rem; }
+  .passport-app header h1 { font-size: .86rem !important; }
+  .passport-app header p { max-width: 175px; }
+}
+
+/* Light-mode panel color rhythm: subtle differentiated tints, never flat white blocks. */
+.passport-app[data-theme="light"] .passport-feature.passport-delay-1 {
+  background: linear-gradient(145deg, rgba(239, 244, 255, .98), rgba(249, 251, 255, .96)) !important;
+  border-color: rgba(105, 126, 224, .24) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-2 {
+  background: linear-gradient(145deg, rgba(233, 248, 252, .98), rgba(248, 253, 255, .96)) !important;
+  border-color: rgba(52, 164, 194, .23) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-3 {
+  background: linear-gradient(145deg, rgba(246, 240, 255, .98), rgba(252, 249, 255, .96)) !important;
+  border-color: rgba(157, 119, 218, .22) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-4 {
+  background: linear-gradient(145deg, rgba(236, 248, 243, .98), rgba(249, 253, 250, .96)) !important;
+  border-color: rgba(70, 164, 128, .22) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-5 {
+  background: linear-gradient(145deg, rgba(255, 245, 235, .98), rgba(255, 251, 247, .96)) !important;
+  border-color: rgba(215, 145, 83, .22) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-6 {
+  background: linear-gradient(145deg, rgba(239, 244, 250, .98), rgba(250, 252, 255, .96)) !important;
+  border-color: rgba(119, 143, 175, .22) !important;
+}
+.passport-app[data-theme="light"] .passport-feature.passport-delay-1::before { background: linear-gradient(90deg, #7187f4, #a8b5ff, transparent); }
+.passport-app[data-theme="light"] .passport-feature.passport-delay-2::before { background: linear-gradient(90deg, #38b8d0, #9be5ec, transparent); }
+.passport-app[data-theme="light"] .passport-feature.passport-delay-3::before { background: linear-gradient(90deg, #9b76e8, #d5b9ff, transparent); }
+.passport-app[data-theme="light"] .passport-feature.passport-delay-4::before { background: linear-gradient(90deg, #48a985, #a7e3c6, transparent); }
+.passport-app[data-theme="light"] .passport-feature.passport-delay-5::before { background: linear-gradient(90deg, #d99557, #f4c89c, transparent); }
+.passport-app[data-theme="light"] .passport-feature.passport-delay-6::before { background: linear-gradient(90deg, #7f9bbd, #c3d2e4, transparent); }

@@ -25,6 +25,8 @@ const GAP_PX = Math.round(0.10 * DPI) // 30px gap (~0.10in) between photos for c
 
 type Step = 'upload' | 'crop' | 'removebg' | 'bgcolor' | 'preview'
 
+const STEP_ORDER: Step[] = ['upload', 'crop', 'removebg', 'bgcolor', 'preview']
+
 const PRESET_COLORS = [
   { label: 'White', value: '#ffffff' },
   { label: 'Off-White', value: '#f5f5f0' },
@@ -59,6 +61,31 @@ function getCroppedCanvas(image: HTMLImageElement, crop: PixelCrop): HTMLCanvasE
 
 export default function PassportPhotoTool() {
   const [step, setStep] = useState<Step>('upload')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward')
+
+  useEffect(() => {
+    try {
+      const savedTheme = window.localStorage.getItem('passport-photo-studio-theme')
+      if (savedTheme === 'light' || savedTheme === 'dark') setTheme(savedTheme)
+    } catch {
+      // Keep the default light theme when browser storage is unavailable.
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('passport-photo-studio-theme', theme)
+    } catch {
+      // Theme persistence is optional; the switch still works for this session.
+    }
+  }, [theme])
+
+  // Visual-only navigation direction lets each workflow stage enter with a matching slide.
+  const goToStep = (nextStep: Step) => {
+    setStepDirection(STEP_ORDER.indexOf(nextStep) >= STEP_ORDER.indexOf(step) ? 'forward' : 'backward')
+    setStep(nextStep)
+  }
   const [srcUrl, setSrcUrl] = useState<string | null>(null)
   const [crop, setCrop] = useState<Crop>({ unit: '%', x: 10, y: 10, width: 80, height: 80 })
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null)
@@ -99,7 +126,7 @@ export default function PassportPhotoTool() {
     const reader = new FileReader()
     reader.onload = () => {
       setSrcUrl(reader.result as string)
-      setStep('crop')
+      goToStep('crop')
       setBgRemoved(false)
       setProcessedDataUrl(null)
       setGridDataUrl(null)
@@ -113,7 +140,7 @@ export default function PassportPhotoTool() {
     setCroppedDataUrl(canvas.toDataURL('image/png'))
     setProcessedDataUrl(canvas.toDataURL('image/png'))
     setBgRemoved(false)
-    setStep('removebg')
+    goToStep('removebg')
   }
 
   const handleRemoveBg = async () => {
@@ -136,11 +163,11 @@ export default function PassportPhotoTool() {
 
   const skipBgRemoval = () => {
     setProcessedDataUrl(croppedDataUrl)
-    setStep('bgcolor')
+    goToStep('bgcolor')
   }
 
   const proceedAfterBgRemoval = () => {
-    setStep('bgcolor')
+    goToStep('bgcolor')
   }
 
   // Apply background color, borders, and generate preview grid
@@ -234,7 +261,15 @@ export default function PassportPhotoTool() {
   const currentStepIdx = steps.findIndex(s => s.id === step)
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-slate-900 selection:bg-slate-900 selection:text-white">
+    <div
+      className="passport-app min-h-screen text-slate-900 selection:bg-slate-900 selection:text-white"
+      data-theme={theme}
+      data-direction={stepDirection}
+      onPointerMove={e => {
+        e.currentTarget.style.setProperty('--pointer-x', `${e.clientX}px`)
+        e.currentTarget.style.setProperty('--pointer-y', `${e.clientY}px`)
+      }}
+    >
       <style>{`
         @keyframes floatIn {
           from { opacity: 0; transform: translateY(14px); }
@@ -376,6 +411,25 @@ export default function PassportPhotoTool() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              className="passport-theme-toggle inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all"
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            >
+              {theme === 'light' ? (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.2 15.1A8.4 8.4 0 0 1 8.9 3.8 8.5 8.5 0 1 0 20.2 15.1Z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3.7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v2.1M12 19.9V22M4.93 4.93l1.5 1.5m11.14 11.14 1.5 1.5M2 12h2.1m15.8 0H22M4.93 19.07l1.5-1.5M17.57 6.43l1.5-1.5" />
+                </svg>
+              )}
+              <span className="hidden xl:inline">{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
+            </button>
             <a
               href="https://instagram.com/darkshadeoflove"
               target="_blank"
@@ -388,8 +442,8 @@ export default function PassportPhotoTool() {
                 <circle cx="12" cy="12" r="4.05" stroke="currentColor" strokeWidth="1.7"/>
                 <circle cx="17.35" cy="6.8" r="1" fill="currentColor"/>
               </svg>
-              <span className="hidden sm:inline">@darkshadeoflove</span>
-              <span className="sm:hidden">Instagram</span>
+              <span className="hidden xl:inline">@darkshadeoflove</span>
+              <span className="hidden">Instagram</span>
             </a>
             <a
               href="https://github.com/jarvisv2"
@@ -401,8 +455,8 @@ export default function PassportPhotoTool() {
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .7a11.3 11.3 0 00-3.57 22.02c.57.1.78-.25.78-.55v-2.05c-3.18.7-3.85-1.53-3.85-1.53-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.25 3.33.95.1-.74.4-1.25.73-1.54-2.54-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.13 1.17a10.9 10.9 0 015.7 0c2.17-1.48 3.13-1.17 3.13-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.38-2.67 5.34-5.21 5.63.41.36.78 1.07.78 2.16v3.21c0 .3.21.65.79.54A11.3 11.3 0 0012 .7z"/>
               </svg>
-              <span className="hidden sm:inline">@jarvisv2</span>
-              <span className="sm:hidden">GitHub</span>
+              <span className="hidden xl:inline">@jarvisv2</span>
+              <span className="hidden">GitHub</span>
             </a>
             <a
               href="https://www.facebook.com/palu.das.33/"
@@ -414,8 +468,8 @@ export default function PassportPhotoTool() {
               <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.5 22v-8h2.75l.4-3h-3.15V9.08c0-.87.24-1.46 1.5-1.46h1.8V4.94c-.31-.04-1.37-.13-2.6-.13-2.57 0-4.33 1.57-4.33 4.45V11H7v3h2.67v8h3.83z"/>
               </svg>
-              <span className="hidden sm:inline">Soumen Kumbhakar</span>
-              <span className="sm:hidden">Facebook</span>
+              <span className="hidden xl:inline">Soumen Kumbhakar</span>
+              <span className="hidden">Facebook</span>
             </a>
           </div>
         </div>
@@ -489,7 +543,7 @@ export default function PassportPhotoTool() {
                   const reader = new FileReader()
                   reader.onload = () => {
                     setSrcUrl(reader.result as string)
-                    setStep('crop')
+                    goToStep('crop')
                   }
                   reader.readAsDataURL(file)
                 }
@@ -583,7 +637,7 @@ export default function PassportPhotoTool() {
                   </div>
                   <div className="flex items-center gap-2 justify-end">
                     <button
-                      onClick={() => { setSrcUrl(null); setStep('upload') }}
+                      onClick={() => { setSrcUrl(null); goToStep('upload') }}
                       className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                     >
                       Back
@@ -636,7 +690,7 @@ export default function PassportPhotoTool() {
 
                 <div className="mt-7 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <button
-                    onClick={() => setStep('crop')}
+                    onClick={() => goToStep('crop')}
                     className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                   >
                     Back
@@ -764,13 +818,13 @@ export default function PassportPhotoTool() {
 
                   <div className="mt-7 flex items-center gap-2">
                     <button
-                      onClick={() => setStep('removebg')}
+                      onClick={() => goToStep('removebg')}
                       className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                     >
                       Back
                     </button>
                     <button
-                      onClick={() => setStep('preview')}
+                      onClick={() => goToStep('preview')}
                       className="passport-cta flex-1 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all hover:-translate-y-0.5"
                     >
                       Preview sheet
@@ -794,7 +848,7 @@ export default function PassportPhotoTool() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setStep('bgcolor')}
+                    onClick={() => goToStep('bgcolor')}
                     className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                   >
                     Back
@@ -925,16 +979,16 @@ export default function PassportPhotoTool() {
                     </>
                   )}
 
-                  <div className="rounded-[22px] border border-slate-200 bg-slate-950 p-5 text-white shadow-lg shadow-slate-950/10">
+                  <div className="passport-print-tip rounded-[22px] border border-slate-200 bg-slate-950 p-5 text-white shadow-lg shadow-slate-950/10">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                      <div className="passport-print-tip-icon w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M6 3h12M6 21h12M8 3v3a4 4 0 004 4 4 4 0 004-4V3M8 21v-3a4 4 0 014-4 4 4 0 014 4v3"/>
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">Print tip</p>
-                        <p className="mt-1.5 text-xs leading-5 text-slate-300">
+                        <p className="passport-print-tip-title text-sm font-semibold">Print tip</p>
+                        <p className="passport-print-tip-copy mt-1.5 text-xs leading-5 text-slate-300">
                           Print the downloaded JPG at 4×6 inches, Actual Size / 100%, with no scaling.
                         </p>
                       </div>
